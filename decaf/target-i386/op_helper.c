@@ -5044,8 +5044,7 @@ void tlb_fill(CPUState *env1, target_ulong addr, int is_write, int mmu_idx,
 
 #if defined(CONFIG_USER_ONLY)
 
-void helper_vmrun(int aflag, int next_eip_addend)
-{ 
+void helper_vmrun(int aflag, int next_eip_addend){ 
 }
 void helper_vmmcall(void) 
 { 
@@ -5083,6 +5082,7 @@ void helper_svm_check_io(uint32_t port, uint32_t param,
                          uint32_t next_eip_addend)
 {
 }
+
 #else
 
 static inline void svm_save_seg(target_phys_addr_t addr,

@@ -7637,11 +7637,13 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 reg = 8;
             }
             switch(reg) {
+            case 8:
+            case 4:
             case 0:
             case 2:
             case 3:
-            case 4:
-            case 8:
+                if(DECAF_is_callback_needed(DECAF_VTX_CB))
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env);
                 if (s->cc_op != CC_OP_DYNAMIC)
                     gen_op_set_cc_op(s->cc_op);
                 gen_jmp_im(pc_start - s->cs_base);
