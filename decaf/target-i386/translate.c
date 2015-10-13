@@ -7237,6 +7237,8 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
         case 0: /* sgdt */
             if (mod == 3)
                 goto illegal_op;
+            //if(DECAF_is_callback_needed(DECAF_VTX_CB))
+            //    gen_helper_DECAF_invoke_vtx_callback(cpu_env, VTX_EXIT_GDTR_IDTR_ACCESS);
             gen_svm_check_intercept(s, pc_start, SVM_EXIT_GDTR_READ);
             gen_lea_modrm(s, modrm, &reg_addr, &offset_addr);
             tcg_gen_ld32u_tl(cpu_T[0], cpu_env, offsetof(CPUX86State, gdt.limit));
@@ -7283,6 +7285,8 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                     goto illegal_op;
                 }
             } else { /* sidt */
+                //if(DECAF_is_callback_needed(DECAF_VTX_CB))
+                //    gen_helper_DECAF_invoke_vtx_callback(cpu_env, VTX_EXIT_GDTR_IDTR_ACCESS);
                 gen_svm_check_intercept(s, pc_start, SVM_EXIT_IDTR_READ);
                 gen_lea_modrm(s, modrm, &reg_addr, &offset_addr);
                 tcg_gen_ld32u_tl(cpu_T[0], cpu_env, offsetof(CPUX86State, idt.limit));
@@ -7384,6 +7388,8 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             } else if (s->cpl != 0) {
                 gen_exception(s, EXCP0D_GPF, pc_start - s->cs_base);
             } else {
+                //if(DECAF_is_callback_needed(DECAF_VTX_CB))
+                //    gen_helper_DECAF_invoke_vtx_callback(cpu_env, VTX_EXIT_GDTR_IDTR_ACCESS);
                 gen_svm_check_intercept(s, pc_start,
                                         op==2 ? SVM_EXIT_GDTR_WRITE : SVM_EXIT_IDTR_WRITE);
                 gen_lea_modrm(s, modrm, &reg_addr, &offset_addr);
@@ -7643,7 +7649,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             case 2:
             case 3:
                 if(DECAF_is_callback_needed(DECAF_VTX_CB))
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, VTX_EXIT_CR_ACCESS);
                 if (s->cc_op != CC_OP_DYNAMIC)
                     gen_op_set_cc_op(s->cc_op);
                 gen_jmp_im(pc_start - s->cs_base);

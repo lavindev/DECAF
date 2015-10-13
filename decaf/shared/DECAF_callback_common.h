@@ -49,7 +49,7 @@ typedef enum {
         DECAF_MEM_READ_CB,
         DECAF_MEM_WRITE_CB,
         DECAF_EIP_CHECK_CB,
-        DECAF_KEYSTROKE_CB,//keystroke event
+        DECAF_KEYSTROKE_CB, // keystroke event
         DECAF_NIC_REC_CB,
         DECAF_NIC_SEND_CB,
         DECAF_OPCODE_RANGE_CB,
@@ -64,6 +64,70 @@ typedef enum {
         DECAF_LAST_CB, //place holder for the last position, no other uses.
 } DECAF_callback_type_t;
 
+// VT-x Exit types
+
+//typedef enum vtx_exit {
+#define	VTX_EXIT_NMI 0
+#define	VTX_EXIT_EXT_INT 1
+#define	VTX_EXIT_TRIPLE_FAULT 2
+#define	VTX_EXIT_INIT_SIG 3
+#define	VTX_EXIT_SIPI 4
+#define	VTX_EXIT_SMI 5
+#define	VTX_EXIT_OtherSMI 6
+#define	VTX_EXIT_INT_WINDOW 7
+#define	VTX_EXIT_NMI_WINDOW 8
+#define	VTX_EXIT_TASK_SWITCH 9
+#define	VTX_EXIT_CPUID 10
+#define	VTX_EXIT_GETSEC 11
+#define	VTX_EXIT_HLT 12
+#define	VTX_EXIT_INVD 13
+#define	VTX_EXIT_INVLPG 14
+#define	VTX_EXIT_RDPMC 15
+#define	VTX_EXIT_RDTSC 16
+#define	VTX_EXIT_RSM 17
+#define	VTX_EXIT_VMCALL 18
+#define	VTX_EXIT_VMCLEAR 19
+#define	VTX_EXIT_VMLAUNCH 20
+#define	VTX_EXIT_VMPTRLD 21
+#define	VTX_EXIT_VMPTRST 22
+#define	VTX_EXIT_VMREAD 23
+#define	VTX_EXIT_VMRESUME 24
+#define	VTX_EXIT_VMWRITE 25
+#define	VTX_EXIT_VMXOFF 26
+#define	VTX_EXIT_VMXON 27
+#define	VTX_EXIT_CR_ACCESS 28
+#define	VTX_EXIT_MOV_DR 29
+#define	VTX_EXIT_IO 30
+#define	VTX_EXIT_RDMSR 31
+#define	VTX_EXIT_WRMSR 32
+#define	VTX_EXIT_VM_ENTRY_FAIL_GUEST 33
+#define	VTX_EXIT_VM_ENTRY_FAIL_MSR 34
+#define	VTX_EXIT_MWAIT 36
+#define	VTX_EXIT_MONITOR_TRAP 37
+#define	VTX_EXIT_MONITOR 39
+#define	VTX_EXIT_PAUSE  40
+#define	VTX_EXIT_VM_ENTRY_FAIL_MACHINE_CHECK  41
+#define	VTX_EXIT_TPR_THRESHHOLD 43
+#define	VTX_EXIT_APIC_ACCESS 44
+#define	VTX_EXIT_VIRT_EOI 45
+#define	VTX_EXIT_GDTR_IDTR_ACCESS 46
+#define	VTX_EXIT_LDTR_TR_ACCESS 47
+#define	VTX_EXIT_EPT_VIOLATION 48
+#define	VTX_EXIT_EPT_MISCONFIG 49
+#define	VTX_EXIT_INVEPT 50
+#define	VTX_EXIT_RDTSCP 51
+#define	VTX_EXIT_VMX_TIMER_EXP 52
+#define	VTX_EXIT_INVVPID 53
+#define	VTX_EXIT_WBINVD 54
+#define	VTX_EXIT_XSETBV 55
+#define	VTX_EXIT_APIC_WRITE 56
+#define	VTX_EXIT_RDRAND 57
+#define	VTX_EXIT_INVPCID 58
+#define	VTX_EXIT_VMFUNC 59
+#define	VTX_EXIT_RDSEED 61
+#define	VTX_EXIT_XSAVES 63
+#define	VTX_EXIT_XRSTORS 64
+//} vtx_exit_t;
 
 //Optimized Callback type
 typedef enum _OCB_t {
@@ -203,6 +267,12 @@ typedef struct _DECAF_Block_Trans_Params
 	struct TCGContext *tcg_ctx;
 }DECAF_Block_Trans_Params;
 #endif /* CONFIG_TCG_LLVM */
+
+typedef struct _DECAF_VTX_Params
+{
+	uint32_t exit_reason;
+}DECAF_VTX_Params;
+
 //LOK: A dummy type
 typedef struct _DECAF_Callback_Params
 {
@@ -225,6 +295,7 @@ typedef struct _DECAF_Callback_Params
 #ifdef CONFIG_TCG_LLVM
 		DECAF_Block_Trans_Params bt;
 #endif /* CONFIG_TCG_LLVM */
+		DECAF_VTX_Params vtx;
 	};
 } DECAF_Callback_Params;
 
