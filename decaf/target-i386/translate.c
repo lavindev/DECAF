@@ -27,6 +27,9 @@
 #include "disas.h"
 #include "tcg-op.h"
 
+/* DEBUG */
+#include "utils/Output.h"
+
 #include "helper.h"
 #define GEN_HELPER 1
 #include "helper.h"
@@ -95,6 +98,8 @@ static TCGv cpu_regs[CPU_NB_REGS];
 static TCGv taint_cpu_regs[CPU_NB_REGS];
 static TCGv /*taint_cpu_A0,*/ taint_cpu_cc_src, taint_cpu_cc_dst, taint_cpu_cc_tmp;
 static TCGv eip_taint;
+
+
 // AWH - Now in shared/DECAF_tcg_taint.c static TCGv tempidx, tempidx2;
 #endif /* CONFIG_TCG_TAINT */
 
@@ -4228,6 +4233,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
     int modrm, reg, rm, mod, reg_addr, op, opreg, offset_addr, val;
     target_ulong next_eip, tval;
     int rex_w, rex_r;
+    TCGv_i32 vtx_exit_reason;
 
     //LOK: update the new globals - cur_pc is NOT the current_eip
     // and next_pc is the next IF jmp
@@ -7237,8 +7243,10 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
         case 0: /* sgdt */
             if (mod == 3)
                 goto illegal_op;
-            //if(DECAF_is_callback_needed(DECAF_VTX_CB))
-            //    gen_helper_DECAF_invoke_vtx_callback(cpu_env, VTX_EXIT_GDTR_IDTR_ACCESS);
+            if(DECAF_is_callback_needed(DECAF_VTX_CB)){
+                    vtx_exit_reason = tcg_const_i32(VTX_EXIT_GDTR_IDTR_ACCESS);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+            }
             gen_svm_check_intercept(s, pc_start, SVM_EXIT_GDTR_READ);
             gen_lea_modrm(s, modrm, &reg_addr, &offset_addr);
             tcg_gen_ld32u_tl(cpu_T[0], cpu_env, offsetof(CPUX86State, gdt.limit));
@@ -7285,8 +7293,10 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                     goto illegal_op;
                 }
             } else { /* sidt */
-                //if(DECAF_is_callback_needed(DECAF_VTX_CB))
-                //    gen_helper_DECAF_invoke_vtx_callback(cpu_env, VTX_EXIT_GDTR_IDTR_ACCESS);
+                if(DECAF_is_callback_needed(DECAF_VTX_CB)){
+                    vtx_exit_reason = tcg_const_i32(VTX_EXIT_GDTR_IDTR_ACCESS);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                }
                 gen_svm_check_intercept(s, pc_start, SVM_EXIT_IDTR_READ);
                 gen_lea_modrm(s, modrm, &reg_addr, &offset_addr);
                 tcg_gen_ld32u_tl(cpu_T[0], cpu_env, offsetof(CPUX86State, idt.limit));
@@ -7388,8 +7398,10 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             } else if (s->cpl != 0) {
                 gen_exception(s, EXCP0D_GPF, pc_start - s->cs_base);
             } else {
-                //if(DECAF_is_callback_needed(DECAF_VTX_CB))
-                //    gen_helper_DECAF_invoke_vtx_callback(cpu_env, VTX_EXIT_GDTR_IDTR_ACCESS);
+                if(DECAF_is_callback_needed(DECAF_VTX_CB)){
+                    vtx_exit_reason = tcg_const_i32(VTX_EXIT_GDTR_IDTR_ACCESS);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                }
                 gen_svm_check_intercept(s, pc_start,
                                         op==2 ? SVM_EXIT_GDTR_WRITE : SVM_EXIT_IDTR_WRITE);
                 gen_lea_modrm(s, modrm, &reg_addr, &offset_addr);
@@ -7648,8 +7660,10 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             case 0:
             case 2:
             case 3:
-                if(DECAF_is_callback_needed(DECAF_VTX_CB))
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, VTX_EXIT_CR_ACCESS);
+                if(DECAF_is_callback_needed(DECAF_VTX_CB)){
+                    vtx_exit_reason = tcg_const_i32(VTX_EXIT_CR_ACCESS);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                }
                 if (s->cc_op != CC_OP_DYNAMIC)
                     gen_op_set_cc_op(s->cc_op);
                 gen_jmp_im(pc_start - s->cs_base);

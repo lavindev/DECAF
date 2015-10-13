@@ -284,6 +284,8 @@ struct CPUAlphaState {
     uint32_t features;
     uint32_t amask;
     int implver;
+
+
 };
 
 #define cpu_init cpu_alpha_init

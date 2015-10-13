@@ -8,7 +8,6 @@
 #define CONFIG_QEMU_SYSCONFDIR "/usr/local/etc"
 #define CONFIG_QEMU_DOCDIR "/usr/local/share/doc/qemu"
 #define CONFIG_QEMU_CONFDIR "/usr/local/etc/qemu"
-#define CONFIG_VMI_ENABLE 1
 #define HOST_X86_64 1
 #define HOST_LONG_BITS 64
 #define CONFIG_POSIX 1
@@ -26,11 +25,10 @@
 #define CONFIG_BDRV_WHITELIST \
     NULL
 #define CONFIG_VNC 1
-#define CONFIG_VNC_PNG 1
 #define CONFIG_FNMATCH 1
 #define QEMU_VERSION "1.0"
 #define QEMU_PKGVERSION ""
-#define SRC_PATH "/home/lavin/DECAF/decaf"
+#define SRC_PATH "/home/expo/DECAF/decaf"
 #define CONFIG_ATFILE 1
 #define CONFIG_UTIMENSAT 1
 #define CONFIG_PIPE2 1
@@ -55,7 +53,6 @@
 #define CONFIG_FDATASYNC 1
 #define CONFIG_MADVISE 1
 #define CONFIG_POSIX_MADVISE 1
-#define CONFIG_SPICE 1
 #define CONFIG_SMARTCARD 1
 #define CONFIG_UNAME_RELEASE ""
 #define CONFIG_ZERO_MALLOC 1

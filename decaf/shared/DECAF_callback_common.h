@@ -268,6 +268,7 @@ typedef struct _DECAF_Block_Trans_Params
 }DECAF_Block_Trans_Params;
 #endif /* CONFIG_TCG_LLVM */
 
+
 typedef struct _DECAF_VTX_Params
 {
 	uint32_t exit_reason;
@@ -292,10 +293,10 @@ typedef struct _DECAF_Callback_Params
 		DECAF_Tlb_Exec_Params tx;
 		DECAF_Read_Taint_Mem rt;
 		DECAF_Write_Taint_Mem wt;
+		DECAF_VTX_Params vtx;
 #ifdef CONFIG_TCG_LLVM
 		DECAF_Block_Trans_Params bt;
 #endif /* CONFIG_TCG_LLVM */
-		DECAF_VTX_Params vtx;
 	};
 } DECAF_Callback_Params;
 

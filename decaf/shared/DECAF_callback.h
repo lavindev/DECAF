@@ -77,7 +77,7 @@ extern void helper_DECAF_invoke_block_end_callback(CPUState* env, TranslationBlo
 extern void helper_DECAF_invoke_insn_begin_callback(CPUState* env);
 extern void helper_DECAF_invoke_insn_end_callback(CPUState* env);
 extern void helper_DECAF_invoke_vmcall_callback(CPUState* env);
-extern void helper_DECAF_invoke_vtx_callback(CPUState* env, uint32_t reason);
+extern void helper_DECAF_invoke_vtx_callback(CPUState* env, int32_t reason);
 extern void helper_DECAF_invoke_eip_check_callback(gva_t source_eip, gva_t target_eip, gva_t target_eip_taint);
 extern void helper_DECAF_invoke_opcode_range_callback(
   CPUState *env,

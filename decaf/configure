@@ -111,7 +111,7 @@ target_list=""
 #AWH - LLVM support disabled by default
 tcg_llvm="no"
 #AWH - VMI enabled by default
-enable_vmi="yes"
+enable_vmi="no"
 #AWH - TCG tainting off by default
 tcg_taint="no"
 #AWH - TCG IR logging off by default

@@ -17,7 +17,7 @@ static void vtx_callback(DECAF_Callback_Params* params) {
 
   uint32_t reason = params->vtx.exit_reason;
   
-  //++callback_counts[ (int)reason ];
+  ++callback_counts[ (int)reason ];
   
   switch (reason){
     case VTX_EXIT_NMI: 							DECAF_printf("VTX_EXIT_NMI\n");							break;
