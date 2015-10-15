@@ -9,11 +9,9 @@
 static plugin_interface_t my_interface;
 static DECAF_Handle vtx_handle = DECAF_NULL_HANDLE;
 
-static int callback_counts[64];
+static int callback_counts[65];
 
 static void vtx_callback(DECAF_Callback_Params* params) {
-
-  DECAF_printf("Got vtx callback -- ");
 
   uint32_t reason = params->vtx.exit_reason;
   
@@ -36,7 +34,7 @@ static void vtx_callback(DECAF_Callback_Params* params) {
     case VTX_EXIT_INVD: 						DECAF_printf("VTX_EXIT_INVD\n");						break;
     case VTX_EXIT_INVLPG: 						DECAF_printf("VTX_EXIT_INVLPG\n");						break;
     case VTX_EXIT_RDPMC: 						DECAF_printf("VTX_EXIT_RDPMC\n");						break;
-    case VTX_EXIT_RDTSC: 						DECAF_printf("VTX_EXIT_RDTSC\n");						break;
+    case VTX_EXIT_RDTSC: 						/*DECAF_printf("VTX_EXIT_RDTSC\n");*/						break;
     case VTX_EXIT_RSM: 							DECAF_printf("VTX_EXIT_RSM\n");							break;
     case VTX_EXIT_VMCALL: 						DECAF_printf("VTX_EXIT_VMCALL\n");						break;
     case VTX_EXIT_VMCLEAR: 						DECAF_printf("VTX_EXIT_VMCLEAR\n");						break;
@@ -48,7 +46,8 @@ static void vtx_callback(DECAF_Callback_Params* params) {
     case VTX_EXIT_VMWRITE: 						DECAF_printf("VTX_EXIT_VMWRITE\n");						break;
     case VTX_EXIT_VMXOFF: 						DECAF_printf("VTX_EXIT_VMXOFF\n");						break;
     case VTX_EXIT_VMXON: 						DECAF_printf("VTX_EXIT_VMXON\n");						break;
-    case VTX_EXIT_CR_ACCESS: 					DECAF_printf("VTX_EXIT_CR_ACCESS\n");					break;
+    // disabling printfs for CR Access
+    case VTX_EXIT_CR_ACCESS: 					/*DECAF_printf("VTX_EXIT_CR_ACCESS\n");*/					break;
     case VTX_EXIT_MOV_DR: 						DECAF_printf("VTX_EXIT_MOV_DR\n");						break;
     case VTX_EXIT_IO: 							DECAF_printf("VTX_EXIT_IO\n");							break;
     case VTX_EXIT_RDMSR: 						DECAF_printf("VTX_EXIT_RDMSR\n");						break;
