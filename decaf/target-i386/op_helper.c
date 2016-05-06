@@ -1477,6 +1477,11 @@ static void QEMU_NORETURN raise_interrupt(int intno, int is_int, int error_code,
                                           int next_eip_addend)
 {
     if (!is_int) {
+
+        if(DECAF_is_callback_needed(DECAF_VTX_CB)){
+            helper_DECAF_invoke_vtx_callback(cpu_env, VTX_EXIT_EXCP_NMI, intno);
+        }
+
         helper_svm_check_intercept_param(SVM_EXIT_EXCP_BASE + intno, error_code);
         intno = check_exception(intno, &error_code);
     } else {

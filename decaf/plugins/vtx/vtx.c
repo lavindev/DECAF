@@ -4,85 +4,36 @@
 #include "DECAF_callback_common.h"
 #include "utils/Output.h"
 
+#define BIT_SET(x, y) ((x) & (1UL << (y)))
 
 
 static plugin_interface_t my_interface;
 static DECAF_Handle vtx_handle = DECAF_NULL_HANDLE;
 
+// exit bitmap: bit 'x' is set if reason (x-1) is enabled
+static uint64_t exit_bitmap = 0xFFFFFFFFFFFFFFFF;
+// seperate flag for exceptions (exit reason 0)
+static uint32_t enable_exceptions = 1; 
+
 static int callback_counts[65];
+static int exception_counts[256];
 
 static void vtx_callback(DECAF_Callback_Params* params) {
 
   uint32_t reason = params->vtx.exit_reason;
+  uint32_t vector = params->vtx.vector;
   
-  ++callback_counts[ (int)reason ];
-  
-  switch (reason){
-    case VTX_EXIT_NMI: 							DECAF_printf("VTX_EXIT_NMI\n");							break;
-    case VTX_EXIT_EXT_INT: 						DECAF_printf("VTX_EXIT_EXT_INT\n");						break;
-    case VTX_EXIT_TRIPLE_FAULT: 				DECAF_printf("VTX_EXIT_TRIPLE_FAULT\n");				break;
-    case VTX_EXIT_INIT_SIG: 					DECAF_printf("VTX_EXIT_INIT_SIG\n");					break;
-    case VTX_EXIT_SIPI: 						DECAF_printf("VTX_EXIT_SIPI\n");						break;
-    case VTX_EXIT_SMI: 							DECAF_printf("VTX_EXIT_SMI\n");							break;
-    case VTX_EXIT_OtherSMI: 					DECAF_printf("VTX_EXIT_OtherSMI\n");					break;
-    case VTX_EXIT_INT_WINDOW: 					DECAF_printf("VTX_EXIT_INT_WINDOW\n");					break;
-    case VTX_EXIT_NMI_WINDOW: 					DECAF_printf("VTX_EXIT_NMI_WINDOW\n");					break;
-    case VTX_EXIT_TASK_SWITCH: 					DECAF_printf("VTX_EXIT_TASK_SWITCH\n");					break;
-    case VTX_EXIT_CPUID: 						DECAF_printf("VTX_EXIT_CPUID\n");						break;
-    case VTX_EXIT_GETSEC: 						DECAF_printf("VTX_EXIT_GETSEC\n");						break;
-    case VTX_EXIT_HLT: 							DECAF_printf("VTX_EXIT_HLT\n");							break;
-    case VTX_EXIT_INVD: 						DECAF_printf("VTX_EXIT_INVD\n");						break;
-    case VTX_EXIT_INVLPG: 						DECAF_printf("VTX_EXIT_INVLPG\n");						break;
-    case VTX_EXIT_RDPMC: 						DECAF_printf("VTX_EXIT_RDPMC\n");						break;
-    case VTX_EXIT_RDTSC: 						/*DECAF_printf("VTX_EXIT_RDTSC\n");*/						break;
-    case VTX_EXIT_RSM: 							DECAF_printf("VTX_EXIT_RSM\n");							break;
-    case VTX_EXIT_VMCALL: 						DECAF_printf("VTX_EXIT_VMCALL\n");						break;
-    case VTX_EXIT_VMCLEAR: 						DECAF_printf("VTX_EXIT_VMCLEAR\n");						break;
-    case VTX_EXIT_VMLAUNCH: 					DECAF_printf("VTX_EXIT_VMLAUNCH\n");					break;
-    case VTX_EXIT_VMPTRLD: 						DECAF_printf("VTX_EXIT_VMPTRLD\n");						break;
-    case VTX_EXIT_VMPTRST: 						DECAF_printf("VTX_EXIT_VMPTRST\n");						break;
-    case VTX_EXIT_VMREAD: 						DECAF_printf("VTX_EXIT_VMREAD\n");						break;
-    case VTX_EXIT_VMRESUME: 					DECAF_printf("VTX_EXIT_VMRESUME\n");					break;
-    case VTX_EXIT_VMWRITE: 						DECAF_printf("VTX_EXIT_VMWRITE\n");						break;
-    case VTX_EXIT_VMXOFF: 						DECAF_printf("VTX_EXIT_VMXOFF\n");						break;
-    case VTX_EXIT_VMXON: 						DECAF_printf("VTX_EXIT_VMXON\n");						break;
-    // disabling printfs for CR Access
-    case VTX_EXIT_CR_ACCESS: 					/*DECAF_printf("VTX_EXIT_CR_ACCESS\n");*/					break;
-    case VTX_EXIT_MOV_DR: 						DECAF_printf("VTX_EXIT_MOV_DR\n");						break;
-    case VTX_EXIT_IO: 							DECAF_printf("VTX_EXIT_IO\n");							break;
-    case VTX_EXIT_RDMSR: 						DECAF_printf("VTX_EXIT_RDMSR\n");						break;
-    case VTX_EXIT_WRMSR: 						DECAF_printf("VTX_EXIT_WRMSR\n");						break;
-    case VTX_EXIT_VM_ENTRY_FAIL_GUEST: 			DECAF_printf("VTX_EXIT_VM_ENTRY_FAIL_GUEST\n");			break;
-    case VTX_EXIT_VM_ENTRY_FAIL_MSR: 			DECAF_printf("VTX_EXIT_VM_ENTRY_FAIL_MSR\n");			break;
-    case VTX_EXIT_MWAIT: 						DECAF_printf("VTX_EXIT_MWAIT\n");						break;
-    case VTX_EXIT_MONITOR_TRAP: 				DECAF_printf("VTX_EXIT_MONITOR_TRAP\n");				break;
-    case VTX_EXIT_MONITOR: 						DECAF_printf("VTX_EXIT_MONITOR\n");						break;
-    case VTX_EXIT_PAUSE: 						DECAF_printf("VTX_EXIT_PAUSE\n");						break;
-    case VTX_EXIT_VM_ENTRY_FAIL_MACHINE_CHECK: 	DECAF_printf("VTX_EXIT_VM_ENTRY_FAIL_MACHINE_CHECK\n");	break;
-    case VTX_EXIT_TPR_THRESHHOLD: 				DECAF_printf("VTX_EXIT_TPR_THRESHHOLD\n");				break;
-    case VTX_EXIT_APIC_ACCESS: 					DECAF_printf("VTX_EXIT_APIC_ACCESS\n");					break;
-    case VTX_EXIT_VIRT_EOI: 					DECAF_printf("VTX_EXIT_VIRT_EOI\n");					break;
-    case VTX_EXIT_GDTR_IDTR_ACCESS: 			DECAF_printf("VTX_EXIT_GDTR_IDTR_ACCESS\n");			break;
-    case VTX_EXIT_LDTR_TR_ACCESS: 				DECAF_printf("VTX_EXIT_LDTR_TR_ACCESS\n");				break;
-    case VTX_EXIT_EPT_VIOLATION: 				DECAF_printf("VTX_EXIT_EPT_VIOLATION\n");				break;
-    case VTX_EXIT_EPT_MISCONFIG: 				DECAF_printf("VTX_EXIT_EPT_MISCONFIG\n");				break;
-    case VTX_EXIT_INVEPT: 						DECAF_printf("VTX_EXIT_INVEPT\n");						break;
-    case VTX_EXIT_RDTSCP: 						DECAF_printf("VTX_EXIT_RDTSCP\n");						break;
-    case VTX_EXIT_VMX_TIMER_EXP: 				DECAF_printf("VTX_EXIT_VMX_TIMER_EXP\n");				break;
-    case VTX_EXIT_INVVPID: 						DECAF_printf("VTX_EXIT_INVVPID\n");						break;
-    case VTX_EXIT_WBINVD: 						DECAF_printf("VTX_EXIT_WBINVD\n");						break;
-    case VTX_EXIT_XSETBV: 						DECAF_printf("VTX_EXIT_XSETBV\n");						break;
-    case VTX_EXIT_APIC_WRITE: 					DECAF_printf("VTX_EXIT_APIC_WRITE\n");					break;
-    case VTX_EXIT_RDRAND: 						DECAF_printf("VTX_EXIT_RDRAND\n");						break;
-    case VTX_EXIT_INVPCID: 						DECAF_printf("VTX_EXIT_INVPCID\n");						break;
-    case VTX_EXIT_VMFUNC: 						DECAF_printf("VTX_EXIT_VMFUNC\n");						break;
-    case VTX_EXIT_RDSEED: 						DECAF_printf("VTX_EXIT_RDSEED\n");						break;
-    case VTX_EXIT_XSAVES: 						DECAF_printf("VTX_EXIT_XSAVES\n");						break;
-    case VTX_EXIT_XRSTORS: 						DECAF_printf("VTX_EXIT_XRSTORS\n");						break;
-    default: DECAF_printf("Unknown\n");
+  if (reason == VTX_EXIT_EXCP_NMI && enable_exceptions){
+    ++callback_counts[VTX_EXIT_EXCP_NMI];
+    if (vector < 0x20)
+      ++exception_counts[vector];
+    return;
   }
 
-  return;
+  if (BIT_SET(exit_bitmap, reason - 1)){
+    ++callback_counts[ (int)reason ];
+    return;
+  }
 
 }
 
@@ -107,6 +58,94 @@ static int stop_vtx(void) {
   return (0);
 }
 
+static int enable_exit(Monitor *mon, const QDict *qdict) {
+
+  int32_t reason = qdict_get_int(qdict,"exit_reason");
+
+  if (reason == -1){
+    enable_exceptions = 1;
+    exit_bitmap = 0xFFFFFFFFFFFFFFFF;
+    return 0;
+  }
+
+  if (!(VTX_EXIT_EXCP_NMI <= reason && reason <= VTX_EXIT_XRSTORS)){
+    DECAF_printf("Exit reason out of range\n");
+    return -1;
+  }
+
+
+  if (reason == VTX_EXIT_EXCP_NMI){
+    enable_exceptions = 1;
+  } else {
+    exit_bitmap |= (1UL << (reason - 1));
+  }
+
+  return 0;
+}
+
+
+static int disable_exit(Monitor *mon, const QDict *qdict) {
+
+  int32_t reason = qdict_get_int(qdict,"exit_reason");
+
+  if (reason == -1){
+    enable_exceptions = exit_bitmap = 0;
+    return 0;
+  }
+
+  if (!(VTX_EXIT_EXCP_NMI <= reason && reason <= VTX_EXIT_XRSTORS)){
+    DECAF_printf("Exit reason out of range\n");
+    return -1;
+  }
+
+
+  if (reason == VTX_EXIT_EXCP_NMI){
+    enable_exceptions = 0;
+  } else {
+    exit_bitmap &= ~(1UL << (reason - 1));
+  }
+
+  return 0;
+}
+
+static void print_exit_counts(){
+    
+    int i;
+    DECAF_printf("\n{ \"exit_counts\": {");
+
+    for (i=0; i<64; i++){
+      if (i == 35 ||
+          i == 38 ||
+          i == 42 ||
+          i == 60 ||
+          i == 62) continue;
+
+      DECAF_printf("%d: %d,", i, callback_counts[i]);
+    } 
+    DECAF_printf("%d: %d", 64, callback_counts[64]);
+    DECAF_printf("}}\n");
+}
+
+static void print_exception_counts(){
+    
+    int i;
+    DECAF_printf("\n{ \"exception_counts\": {");
+
+    for (i=0; i<0x1F; i++){
+      DECAF_printf("%d: %d,", i, exception_counts[i]);
+    } 
+    DECAF_printf("%d: %d", 0x1F, exception_counts[0x1F]);
+    DECAF_printf("}}\n");
+}
+
+static void reset_counts(){
+      
+    memset(callback_counts, 0, sizeof(int) * 65);
+    memset(exception_counts, 0, sizeof(int) * 256);
+
+    DECAF_printf("Counts reset\n");
+}
+
 static void my_cleanup(void) {
   DECAF_printf("Unloading vtx...\n");
   stop_vtx();
@@ -126,6 +165,41 @@ static mon_cmd_t my_term_cmds[] = {
     .mhandler.cmd   = stop_vtx,
     .params         = "",
     .help           = "Stop listening for VT-x callbacks"
+  },
+  {
+    .name           = "enable_exit",
+    .args_type      = "exit_reason:i",
+    .mhandler.cmd   = enable_exit,
+    .params         = "exit_reason",
+    .help           = "Enable exit reason <param>, -1 for all"
+  },
+  {
+    .name           = "disable_exit",
+    .args_type      = "exit_reason:i",
+    .mhandler.cmd   = disable_exit,
+    .params         = "exit_reason",
+    .help           = "Disable exit reason <param>, -1 for all"
+  },
+  {
+    .name           = "print_exit_counts",
+    .args_type      = "",
+    .mhandler.cmd   = print_exit_counts,
+    .params         = "",
+    .help           = "Dump exit counts as json dict"
+  },
+  {
+    .name           = "print_exception_counts",
+    .args_type      = "",
+    .mhandler.cmd   = print_exception_counts,
+    .params         = "",
+    .help           = "Dump exception exit counts as json dict"
+  },
+  {
+    .name           = "reset_counts",
+    .args_type      = "",
+    .mhandler.cmd   = reset_counts,
+    .params         = "",
+    .help           = "Reset exit & exception counts"
   },
   {NULL, NULL, },
 };

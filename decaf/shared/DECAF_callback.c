@@ -1137,7 +1137,7 @@ POP_ALL()
 }
 
 /*Copied from INSN_END callback*/
-void helper_DECAF_invoke_vtx_callback(CPUState* env, int32_t reason)
+void helper_DECAF_invoke_vtx_callback(CPUState* env, int32_t reason, int32_t vector)
 {
   static callback_struct_t *cb_struct, *cb_temp;
   static DECAF_Callback_Params params;
@@ -1145,6 +1145,7 @@ void helper_DECAF_invoke_vtx_callback(CPUState* env, int32_t reason)
   if (env == 0) return;
   params.ie.env = env;
   params.vtx.exit_reason = reason;
+  params.vtx.vector = vector;
   PUSH_ALL()
   //FIXME: not thread safe
   LIST_FOREACH_SAFE(cb_struct, &callback_list_heads[DECAF_VTX_CB], link,cb_temp) {

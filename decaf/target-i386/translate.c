@@ -3486,7 +3486,7 @@ static void gen_sse(DisasContext *s, int b, target_ulong pc_start, int rex_r)
         case 0x178:
             if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                 vtx_exit_reason = tcg_const_i32(VTX_EXIT_VMREAD);
-                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
             }
         case 0x378:
             {
@@ -6853,7 +6853,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
         if (prefixes & PREFIX_REPZ) {
             if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                 vtx_exit_reason = tcg_const_i32(VTX_EXIT_PAUSE);
-                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
             }
             gen_svm_check_intercept(s, pc_start, SVM_EXIT_PAUSE);
         }
@@ -7084,14 +7084,14 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
     
                 if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_RDMSR);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 }                
                 gen_helper_rdmsr();
             } else {
     
                 if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_WRMSR);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 }                
                 gen_helper_wrmsr();
             }
@@ -7100,7 +7100,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
     case 0x131: /* rdtsc */
         if (DECAF_is_callback_needed(DECAF_VTX_CB)){
             vtx_exit_reason = tcg_const_i32(VTX_EXIT_RDTSC);
-            gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+            gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
         } 
         if (s->cc_op != CC_OP_DYNAMIC)
             gen_op_set_cc_op(s->cc_op);
@@ -7116,7 +7116,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
     case 0x133: /* rdpmc */
         if (DECAF_is_callback_needed(DECAF_VTX_CB)){
             vtx_exit_reason = tcg_const_i32(VTX_EXIT_RDPMC);
-            gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+            gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
         } 
         if (s->cc_op != CC_OP_DYNAMIC)
             gen_op_set_cc_op(s->cc_op);
@@ -7176,7 +7176,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             gen_op_set_cc_op(s->cc_op);
         if (DECAF_is_callback_needed(DECAF_VTX_CB)){
             vtx_exit_reason = tcg_const_i32(VTX_EXIT_CPUID);
-            gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+            gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
         }
         gen_jmp_im(pc_start - s->cs_base);
         gen_helper_cpuid();
@@ -7193,7 +7193,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             s->is_jmp = DISAS_TB_JUMP;
             if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                 vtx_exit_reason = tcg_const_i32(VTX_EXIT_HLT);
-                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
             }
         }
         break;
@@ -7207,7 +7207,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 goto illegal_op;
             if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                 vtx_exit_reason = tcg_const_i32(VTX_EXIT_LDTR_TR_ACCESS);
-                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
             } 
             gen_svm_check_intercept(s, pc_start, SVM_EXIT_LDTR_READ);
             tcg_gen_ld32u_tl(cpu_T[0], cpu_env, offsetof(CPUX86State,ldt.selector));
@@ -7224,7 +7224,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             } else {
                 if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_LDTR_TR_ACCESS);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 } 
                 gen_svm_check_intercept(s, pc_start, SVM_EXIT_LDTR_WRITE);
                 gen_ldst_modrm(s, modrm, OT_WORD, OR_TMP0, 0);
@@ -7238,7 +7238,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 goto illegal_op;
             if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                 vtx_exit_reason = tcg_const_i32(VTX_EXIT_LDTR_TR_ACCESS);
-                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
             } 
             gen_svm_check_intercept(s, pc_start, SVM_EXIT_TR_READ);
             tcg_gen_ld32u_tl(cpu_T[0], cpu_env, offsetof(CPUX86State,tr.selector));
@@ -7255,7 +7255,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             } else {
                 if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_LDTR_TR_ACCESS);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 } 
                 gen_svm_check_intercept(s, pc_start, SVM_EXIT_TR_WRITE);
                 gen_ldst_modrm(s, modrm, OT_WORD, OR_TMP0, 0);
@@ -7291,31 +7291,31 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             case 0xc1: /*vmcall*/
                 if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_VMCALL);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 } 
             break;
             case 0xc2: /*vmlaunch*/
                 if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_VMLAUNCH);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 } 
             break;
             case 0xc3: /*vmresume*/
                 if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_VMRESUME);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 } 
             break;
             case 0xc4: /*vmxoff*/
                 if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_VMXOFF);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 } 
             break;
             case 0xd1: /*xsetbv*/
                 if (DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_XSETBV);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 } 
             break;
         }
@@ -7326,7 +7326,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 goto illegal_op;
             if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_GDTR_IDTR_ACCESS);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
             }
             gen_svm_check_intercept(s, pc_start, SVM_EXIT_GDTR_READ);
             gen_lea_modrm(s, modrm, &reg_addr, &offset_addr);
@@ -7344,7 +7344,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 case 0: /* monitor */
                     if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                         vtx_exit_reason = tcg_const_i32(VTX_EXIT_MONITOR);
-                        gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                        gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                     }
                     if (!(s->cpuid_ext_features & CPUID_EXT_MONITOR) ||
                         s->cpl != 0)
@@ -7368,7 +7368,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 case 1: /* mwait */
                     if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                         vtx_exit_reason = tcg_const_i32(VTX_EXIT_MWAIT);
-                        gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                        gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                     }
                     if (!(s->cpuid_ext_features & CPUID_EXT_MONITOR) ||
                         s->cpl != 0)
@@ -7384,7 +7384,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             } else { /* sidt */
                 if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_GDTR_IDTR_ACCESS);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 }
                 gen_svm_check_intercept(s, pc_start, SVM_EXIT_IDTR_READ);
                 gen_lea_modrm(s, modrm, &reg_addr, &offset_addr);
@@ -7489,7 +7489,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             } else {
                 if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_GDTR_IDTR_ACCESS);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 }
                 gen_svm_check_intercept(s, pc_start,
                                         op==2 ? SVM_EXIT_GDTR_WRITE : SVM_EXIT_IDTR_WRITE);
@@ -7535,7 +7535,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 } else {
                     if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                         vtx_exit_reason = tcg_const_i32(VTX_EXIT_INVLPG);
-                        gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                        gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                     }
                     if (s->cc_op != CC_OP_DYNAMIC)
                         gen_op_set_cc_op(s->cc_op);
@@ -7571,7 +7571,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 case 1: /* rdtscp */
                     if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                         vtx_exit_reason = tcg_const_i32(VTX_EXIT_RDTSCP);
-                        gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                        gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                     }
                     if (!(s->cpuid_ext2_features & CPUID_EXT2_RDTSCP))
                         goto illegal_op;
@@ -7604,7 +7604,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             /* nothing to do */
             if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                 vtx_exit_reason = tcg_const_i32((b & 2) ? VTX_EXIT_INVD : VTX_EXIT_WBINVD);
-                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
             }
         }
         break;
@@ -7763,7 +7763,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
             case 3:
                 if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                     vtx_exit_reason = tcg_const_i32(VTX_EXIT_CR_ACCESS);
-                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                    gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
                 }
                 if (s->cc_op != CC_OP_DYNAMIC)
                     gen_op_set_cc_op(s->cc_op);
@@ -7802,7 +7802,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
                 goto illegal_op;
             if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                 vtx_exit_reason = tcg_const_i32(VTX_EXIT_MOV_DR);
-                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
             }
             if (b & 2) {
                 gen_svm_check_intercept(s, pc_start, SVM_EXIT_WRITE_DR0 + reg);
@@ -7895,10 +7895,16 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
         case 4: /* xsave */
             if(DECAF_is_callback_needed(DECAF_VTX_CB)){
                 vtx_exit_reason = tcg_const_i32(VTX_EXIT_XSAVES);
-                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
             }
             break;
         case 5: /* lfence */
+
+            if(DECAF_is_callback_needed(DECAF_VTX_CB)){
+                vtx_exit_reason = tcg_const_i32(VTX_EXIT_XRSTORS);
+                gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
+            }
+
         case 6: /* mfence */
             if ((modrm & 0xc7) != 0xc0 || !(s->cpuid_features & CPUID_SSE2))
                 goto illegal_op;
@@ -7932,7 +7938,7 @@ static target_ulong disas_insn(DisasContext *s, target_ulong pc_start)
         gen_svm_check_intercept(s, pc_start, SVM_EXIT_RSM);
         if(DECAF_is_callback_needed(DECAF_VTX_CB)){
             vtx_exit_reason = tcg_const_i32(VTX_EXIT_RSM);
-            gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason);
+            gen_helper_DECAF_invoke_vtx_callback(cpu_env, vtx_exit_reason, tcg_const_i32(0));
         }
         if (!(s->flags & HF_SMM_MASK))
             goto illegal_op;

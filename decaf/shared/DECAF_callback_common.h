@@ -67,7 +67,7 @@ typedef enum {
 // VT-x Exit types
 
 //typedef enum vtx_exit {
-#define	VTX_EXIT_NMI 0
+#define	VTX_EXIT_EXCP_NMI 0
 #define	VTX_EXIT_EXT_INT 1
 #define	VTX_EXIT_TRIPLE_FAULT 2
 #define	VTX_EXIT_INIT_SIG 3
@@ -272,6 +272,7 @@ typedef struct _DECAF_Block_Trans_Params
 typedef struct _DECAF_VTX_Params
 {
 	uint32_t exit_reason;
+	uint32_t vector;
 }DECAF_VTX_Params;
 
 //LOK: A dummy type
